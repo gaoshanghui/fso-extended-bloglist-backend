@@ -37,7 +37,13 @@ test('Blogs are returned as json', async () => {
 
 test('There are two blogs', async () => {
   const response = await api.get('/api/blogs')
+  // console.log(response.body)
   expect(response.body).toHaveLength(initialBlogs.length)
+})
+
+test('Unique identifier property is id', async () => {
+  const response = await api.get('/api/blogs')
+  expect(response.body[0].id).toBeDefined();
 })
 
 afterAll(() => {
