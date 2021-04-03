@@ -66,15 +66,11 @@ test('Blog was successfully created', async () => {
   expect(contents).toContain('Maggieappleton')
 })
 
-test('Check blog has likes property', () => {
+test('Check blog has likes property', async () => {
   const newBlog = {
     title: 'Tania Rascia',
     author: 'Tania Rascia',
     url: 'https://www.taniarascia.com/',
-  }
-
-  if (!newBlog.hasOwnProperty('likes')) {
-    newBlog.likes = 0
   }
 
   const expectedObj = {
@@ -84,7 +80,17 @@ test('Check blog has likes property', () => {
     likes: 0
   }
 
-  expect(newBlog).toEqual(expectedObj)
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  const testContent = response.body[2]
+  delete testContent.id
+  
+  expect(testContent).toEqual(expectedObj)
 })
 
 test('Check blog has title and url properties', async () => {
