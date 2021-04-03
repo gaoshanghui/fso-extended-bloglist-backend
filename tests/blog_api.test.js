@@ -20,13 +20,13 @@ const initialBlogs = [
   }
 ]
 
-beforeEach(async () => {
-  await Blog.deleteMany({})
-  let blogObject = new Blog(initialBlogs[0])
-  await blogObject.save()
-  blogObject = new Blog(initialBlogs[1])
-  await blogObject.save()
-})
+// beforeEach(async () => {
+//   await Blog.deleteMany({})
+//   let blogObject = new Blog(initialBlogs[0])
+//   await blogObject.save()
+//   blogObject = new Blog(initialBlogs[1])
+//   await blogObject.save()
+// })
 
 test('Blogs are returned as json', async () => {
   await api
@@ -37,7 +37,6 @@ test('Blogs are returned as json', async () => {
 
 test('There are two blogs', async () => {
   const response = await api.get('/api/blogs')
-  // console.log(response.body)
   expect(response.body).toHaveLength(initialBlogs.length)
 })
 
@@ -65,6 +64,27 @@ test('Blog was successfully created', async () => {
 
   expect(response.body).toHaveLength(initialBlogs.length + 1)
   expect(contents).toContain('Maggieappleton')
+})
+
+test('Check blog has likes property', () => {
+  const newBlog = {
+    title: 'Tania Rascia',
+    author: 'Tania Rascia',
+    url: 'https://www.taniarascia.com/',
+  }
+
+  if (!newBlog.hasOwnProperty('likes')) {
+    newBlog.likes = 0
+  }
+
+  const expectedObj = {
+    title: 'Tania Rascia',
+    author: 'Tania Rascia',
+    url: 'https://www.taniarascia.com/',
+    likes: 0
+  }
+
+  expect(newBlog).toEqual(expectedObj)
 })
 
 afterAll(() => {
