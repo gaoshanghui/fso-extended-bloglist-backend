@@ -20,13 +20,13 @@ const initialBlogs = [
   }
 ]
 
-// beforeEach(async () => {
-//   await Blog.deleteMany({})
-//   let blogObject = new Blog(initialBlogs[0])
-//   await blogObject.save()
-//   blogObject = new Blog(initialBlogs[1])
-//   await blogObject.save()
-// })
+beforeEach(async () => {
+  await Blog.deleteMany({})
+  let blogObject = new Blog(initialBlogs[0])
+  await blogObject.save()
+  blogObject = new Blog(initialBlogs[1])
+  await blogObject.save()
+})
 
 test('Blogs are returned as json', async () => {
   await api
@@ -85,6 +85,19 @@ test('Check blog has likes property', () => {
   }
 
   expect(newBlog).toEqual(expectedObj)
+})
+
+test('Check blog has title and url properties', async () => {
+  const newBlog = {
+    title: 'Tania Rascia',
+    author: 'Tania Rascia',
+    likes: 1
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
 })
 
 afterAll(() => {
