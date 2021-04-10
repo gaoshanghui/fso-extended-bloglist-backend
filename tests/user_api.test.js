@@ -21,25 +21,25 @@ describe('when there is initially one user in database', () => {
     await user.save()
   })
 
-
-  test('invalid users are not created', async () => {
+  test('creation fails with proper statuscode and message if username already taken', async () => {
     const usersAtStart = await api.get('/api/users')
-    
+
     const newUser = {
-      username: 'mluukkai',
-      name: 'Matti Luukkainen',
-      password: 'ps',
+      username: 'gaoshanghui', 
+      name: 'Gao',
+      password: 'testpassword'
     }
 
-    await api
+    const result = await api
       .post('/api/users')
       .send(newUser)
       .expect(400)
       .expect('Content-Type', /application\/json/)
-    
+
+    expect(result.body.error).toContain('`username` to be unique')
+
     const usersAtEnd = await api.get('/api/users')
-    
-    expect(usersAtEnd.body).toHaveLength(usersAtStart.body.length)
+    expect(usersAtEnd.body).toHaveLength(usersAtStart.body.length)  
   })
 })
 
