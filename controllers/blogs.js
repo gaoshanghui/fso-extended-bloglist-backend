@@ -1,6 +1,16 @@
+const jwt = require('jsonwebtoken')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+
+
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization')
+
+  if (!(authorization && authorization.toLowerCase().startsWith('bearer '))) return null
+
+  return authorization.substring(7)
+}
 
 
 blogsRouter.get('/', async (request, response) => {
@@ -19,16 +29,21 @@ blogsRouter.post('/', async (request, response) => {
     blog.likes = 0
   }
 
-  // setting the first user found in database as this blog's creator
-  const users = await User.find({})
-  const userId = users[0]._id
+  const token = getTokenFrom(request)
+  console.log("Token: ", token)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+  const user = await User.findById(decodedToken.id)
+
+  const userId = user._id
   blog.user = userId
-  // save blog
   const savedBlog = await blog.save()
   
   // update author: update using 'save', because mongoose documents track changes, it will be converted into update operators. 
-  users[0].blogs = users[0].blogs.concat(savedBlog._id)
-  await users[0].save()  
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()  
 
   response.status(201).json(savedBlog)
 })
