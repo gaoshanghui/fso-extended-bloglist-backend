@@ -1,9 +1,10 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 
 blogsRouter.get('/', async (request, response) => {
-  const responsedBlogs = await Blog.find({})
+  const responsedBlogs = await Blog.find({}).populate('user', {username: 1, name: 1})
   response.json(responsedBlogs)
 })
 
@@ -18,7 +19,17 @@ blogsRouter.post('/', async (request, response) => {
     blog.likes = 0
   }
 
+  // setting the first user found in database as this blog's creator
+  const users = await User.find({})
+  const userId = users[0]._id
+  blog.user = userId
+  // save blog
   const savedBlog = await blog.save()
+  
+  // update author
+  users[0].blogs = users[0].blogs.concat(savedBlog._id)
+  await users[0].save()
+
   response.status(201).json(savedBlog)
 })
 
