@@ -26,9 +26,9 @@ blogsRouter.post('/', async (request, response) => {
   // save blog
   const savedBlog = await blog.save()
   
-  // update author
+  // update author: update using 'save', because mongoose documents track changes, it will be converted into update operators. 
   users[0].blogs = users[0].blogs.concat(savedBlog._id)
-  await users[0].save()
+  await users[0].save()  
 
   response.status(201).json(savedBlog)
 })
