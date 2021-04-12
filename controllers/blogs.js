@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -21,14 +20,13 @@ blogsRouter.post('/', async (request, response) => {
   }
 
   const token = request.token
-  const decodedToken = jwt.verify(token, process.env.SECRET)
-  if (!token || !decodedToken.id) {
+  const userAuthenticated = request.user
+  if (!token || !userAuthenticated.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
-  const user = await User.findById(decodedToken.id)
 
-  const userId = user._id
-  blog.user = userId
+  const user = await User.findById(userAuthenticated.id)
+  blog.user = user._id
   const savedBlog = await blog.save()
   
   // update author: update using 'save', because mongoose documents track changes, it will be converted into update operators. 
@@ -41,14 +39,13 @@ blogsRouter.post('/', async (request, response) => {
 blogsRouter.delete('/:id', async (request, response) => {
   const blogId = request.params.id
   const token = request.token
-  const decodedToken = jwt.verify(token, process.env.SECRET)
-  const userId = decodedToken.id
-  if (!token || !userId) {
+  const user = request.user
+  if (!token || !user.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
 
   const blog = await Blog.findById(blogId)
-  if (!(blog.user.toString() === userId)) {
+  if (!(blog.user.toString() === user.id)) {
     return response.status(401).json({ error: 'deleting a blog is possible only by the blog\'s creater' })
   }
 
