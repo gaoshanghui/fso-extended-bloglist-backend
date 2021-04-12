@@ -53,8 +53,16 @@ test('Blog was successfully created', async () => {
     likes: 1
   }
 
+  const res = await api.post('/api/login')
+    .send({
+      username: 'gaoshanghui', 
+      password: 'testpassword'
+    })
+  const token = res.body.token
+  
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer ' + token)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -77,11 +85,24 @@ test('Check blog has likes property', async () => {
     title: 'Tania Rascia',
     author: 'Tania Rascia',
     url: 'https://www.taniarascia.com/',
-    likes: 0
+    likes: 0,
+    user: {
+      id: "607402e0acf98f17207e7108",
+      name: "Gao Shanghui",
+      username: "gaoshanghui",
+    },
   }
+
+  const res = await api.post('/api/login')
+    .send({
+      username: 'gaoshanghui', 
+      password: 'testpassword'
+    })
+  const token = res.body.token
 
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer ' + token)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -91,6 +112,23 @@ test('Check blog has likes property', async () => {
   delete testContent.id
   
   expect(testContent).toEqual(expectedObj)
+})
+
+test('Blog can not be added without token', async () => {
+  const newBlog = {
+    title: 'Tania Rascia',
+    author: 'Tania Rascia',
+    url: 'https://www.taniarascia.com/',
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  expect(response.body).toHaveLength(initialBlogs.length)
 })
 
 test('Check blog has title and url properties', async () => {
