@@ -1,5 +1,5 @@
 {
-  "name": "fso-blog-list",
+  "name": "fso-bloglist-backend",
   "version": "1.0.0",
   "description": "A blog list application",
   "main": "index.js",
